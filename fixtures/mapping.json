@@ -1,9 +1,1 @@
-{
-  "mapping_id": "M001",
-  "entries": [
-    {"sketch_node_id": "SN001", "original_symbol_id": "S001", "page_id": "P001", "bbox": {"x1": 120, "y1": 300, "x2": 300, "y2": 600}},
-    {"sketch_node_id": "SN002", "original_symbol_id": "S002", "page_id": "P001", "bbox": {"x1": 500, "y1": 320, "x2": 620, "y2": 440}},
-    {"sketch_node_id": "SN003", "original_symbol_id": "S003", "page_id": "P001", "bbox": {"x1": 500, "y1": 500, "x2": 620, "y2": 620}},
-    {"sketch_node_id": "SN004", "original_symbol_id": "S004", "page_id": "P001", "bbox": {"x1": 900, "y1": 350, "x2": 1100, "y2": 570}}
-  ]
-}
+[]

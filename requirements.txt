@@ -1,10 +1,11 @@
 fastapi
-uvicorn[standard]
+uvicorn
 pydantic
 python-multipart
+numpy
+opencv-python
 networkx
 pandas
 openpyxl
-PyMuPDF
-pytest
-httpx
+pymupdf
+pillow
