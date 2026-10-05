@@ -1,0 +1,8 @@
+{
+  "io_list": [
+    {"tag": "LT-101", "type": "level"},
+    {"tag": "PT-101A", "type": "pressure"},
+    {"tag": "FT-101B", "type": "flow"},
+    {"tag": "PT-101B", "type": "pressure"}
+  ]
+}

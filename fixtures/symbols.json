@@ -1,0 +1,8 @@
+{
+  "symbols": [
+    {"id": "S001", "page_id": "P001", "class_name": "tank", "tag": "T-101", "bbox": {"x1": 120, "y1": 300, "x2": 300, "y2": 600}, "confidence": 0.98, "source": "fixture", "reviewed": false},
+    {"id": "S002", "page_id": "P001", "class_name": "pump", "tag": "P-101A", "bbox": {"x1": 500, "y1": 320, "x2": 620, "y2": 440}, "confidence": 0.97, "source": "fixture", "reviewed": false},
+    {"id": "S003", "page_id": "P001", "class_name": "pump", "tag": "P-101B", "bbox": {"x1": 500, "y1": 500, "x2": 620, "y2": 620}, "confidence": 0.97, "source": "fixture", "reviewed": false},
+    {"id": "S004", "page_id": "P001", "class_name": "vessel", "tag": "V-201", "bbox": {"x1": 900, "y1": 350, "x2": 1100, "y2": 570}, "confidence": 0.95, "source": "fixture", "reviewed": false}
+  ]
+}

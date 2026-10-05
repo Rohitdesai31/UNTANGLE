@@ -1,0 +1,7 @@
+{
+  "lines": [
+    {"id": "L001", "page_id": "P001", "points": [{"x": 300, "y": 420}, {"x": 500, "y": 380}], "confidence": 0.95, "is_process_line": true, "thickness_px": 4, "dashed": false, "arrows": [{"x": 440, "y": 392}]},
+    {"id": "L002", "page_id": "P001", "points": [{"x": 300, "y": 480}, {"x": 500, "y": 560}], "confidence": 0.94, "is_process_line": true, "thickness_px": 4, "dashed": false, "arrows": [{"x": 440, "y": 536}]},
+    {"id": "L003", "page_id": "P001", "points": [{"x": 620, "y": 380}, {"x": 900, "y": 430}], "confidence": 0.96, "is_process_line": true, "thickness_px": 4, "dashed": false, "arrows": [{"x": 820, "y": 416}]}
+  ]
+}

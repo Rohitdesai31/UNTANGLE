@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L10,3 L0,6 Z" fill="currentColor" />
+    </marker>
+  </defs>
+  <text x="40" y="40" font-family="Arial" font-size="24">UNTANGLE Fixture — Simplified Sketch</text>
+  <rect x="80" y="220" width="180" height="220" rx="25" fill="none" stroke="currentColor" stroke-width="4" />
+  <text x="130" y="335" font-family="Arial" font-size="22">T-101</text>
+  <text x="120" y="470" font-family="Arial" font-size="18">LT-101</text>
+  <circle cx="450" cy="270" r="55" fill="none" stroke="currentColor" stroke-width="4" />
+  <text x="415" y="278" font-family="Arial" font-size="18">P-101A</text>
+  <text x="410" y="190" font-family="Arial" font-size="16">PT-101A</text>
+  <circle cx="450" cy="430" r="55" fill="none" stroke="currentColor" stroke-width="4" />
+  <text x="415" y="438" font-family="Arial" font-size="18">P-101B</text>
+  <text x="405" y="520" font-family="Arial" font-size="16">FT-101B</text>
+  <text x="520" y="560" font-family="Arial" font-size="16">PT-101B</text>
+  <rect x="820" y="220" width="190" height="220" rx="35" fill="none" stroke="currentColor" stroke-width="4" />
+  <text x="875" y="335" font-family="Arial" font-size="22">V-201</text>
+  <line x1="260" y1="300" x2="395" y2="270" stroke="currentColor" stroke-width="4" marker-end="url(#arrow)" />
+  <line x1="260" y1="380" x2="395" y2="430" stroke="currentColor" stroke-width="4" marker-end="url(#arrow)" />
+  <line x1="505" y1="270" x2="820" y2="300" stroke="currentColor" stroke-width="4" marker-end="url(#arrow)" />
+  <line x1="505" y1="430" x2="650" y2="430" stroke="currentColor" stroke-width="4" />
+  <line x1="650" y1="430" x2="650" y2="600" stroke="currentColor" stroke-width="4" />
+  <line x1="650" y1="600" x2="780" y2="600" stroke="currentColor" stroke-width="4" />
+  <text x="760" y="590" font-family="Arial" font-size="16">standby branch</text>
+</svg>

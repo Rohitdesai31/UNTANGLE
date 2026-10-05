@@ -1,0 +1,16 @@
+{
+  "graph_id": "G001",
+  "nodes": [
+    {"id": "N001", "symbol_id": "S001", "class_name": "tank", "tag": "T-101", "page_id": "P001"},
+    {"id": "N002", "symbol_id": "S002", "class_name": "pump", "tag": "P-101A", "page_id": "P001"},
+    {"id": "N003", "symbol_id": "S003", "class_name": "pump", "tag": "P-101B", "page_id": "P001"},
+    {"id": "N004", "symbol_id": "S004", "class_name": "vessel", "tag": "V-201", "page_id": "P001"}
+  ],
+  "edges": [
+    {"id": "E001", "source_node_id": "N001", "target_node_id": "N002", "line_id": "L001", "direction": "downstream", "confidence": 0.93},
+    {"id": "E002", "source_node_id": "N001", "target_node_id": "N003", "line_id": "L002", "direction": "downstream", "confidence": 0.93},
+    {"id": "E003", "source_node_id": "N002", "target_node_id": "N004", "line_id": "L003", "direction": "downstream", "confidence": 0.94}
+  ],
+  "main_path": ["N001", "N002", "N004"],
+  "warnings": []
+}

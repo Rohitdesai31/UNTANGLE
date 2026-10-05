@@ -1,0 +1,15 @@
+{
+  "audit_id": "A001",
+  "io_total": 4,
+  "io_found": 4,
+  "io_missing": 0,
+  "io_coverage": 100.0,
+  "equipment_total": 4,
+  "equipment_found": 4,
+  "connections_valid": true,
+  "flow_valid": true,
+  "status": "PASS",
+  "entries": [
+    {"id": "AUD001", "action": "io_coverage", "source_id": "IO_LIST", "target_id": "P001", "status": "PASS", "message": "All IO tags found."}
+  ]
+}

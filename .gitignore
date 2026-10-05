@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.vscode/
+.idea/
+node_modules/
+
+# Runtime data
+data/uploads/*
+data/intermediate/*
+data/outputs/*
+data/reports/*
+
+# Keep folder structure
+!data/uploads/.gitkeep
+!data/intermediate/.gitkeep
+!data/outputs/.gitkeep
+!data/reports/.gitkeep
+
+# Generated files
+*.log
+*.tmp

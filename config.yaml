@@ -1,0 +1,14 @@
+project:
+  name: UNTANGLE
+  version: 0.1.0
+
+pipeline:
+  min_detection_confidence: 0.50
+  io_coverage_pass_threshold: 100.0
+
+paths:
+  uploads: data/uploads
+  intermediate: data/intermediate
+  outputs: data/outputs
+  reports: data/reports
+  fixtures: fixtures

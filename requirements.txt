@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+networkx
+pandas
+openpyxl
+PyMuPDF
+pytest
+httpx

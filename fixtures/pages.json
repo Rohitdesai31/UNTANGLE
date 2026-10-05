@@ -1,0 +1,13 @@
+{
+  "pages": [
+    {
+      "page_id": "P001",
+      "page_number": 1,
+      "width": 1600,
+      "height": 900,
+      "dpi": 150,
+      "image_path": "data/intermediate/P001.png",
+      "source_pdf": "sample_pid.pdf"
+    }
+  ]
+}
