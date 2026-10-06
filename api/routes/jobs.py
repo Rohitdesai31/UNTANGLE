@@ -1,10 +1,41 @@
-from fastapi import APIRouter
-router = APIRouter(prefix="/jobs", tags=["jobs"])
+from fastapi import APIRouter, HTTPException, status
 
-@router.post("")
-def create_job():
-    return {"message": "job endpoint ready"}
+from api.services.job_service import job_service
+from shared.schemas import Job
 
-@router.get("/{job_id}/status")
-def job_status(job_id: str):
-    return {"job_id": job_id, "status": "created"}
+
+router = APIRouter(
+    prefix="/jobs",
+    tags=["jobs"],
+)
+
+
+@router.post(
+    "",
+    response_model=Job,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_job() -> Job:
+    """
+    Create a new UNTANGLE processing job.
+    """
+    return job_service.create_job()
+
+
+@router.get(
+    "/{job_id}/status",
+    response_model=Job,
+)
+def get_job_status(job_id: str) -> Job:
+    """
+    Get the current status of a processing job.
+    """
+    job = job_service.get_job(job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' was not found.",
+        )
+
+    return job
