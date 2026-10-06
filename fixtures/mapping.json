@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "original_id": "SYM-001",
+    "simplified_id": "SIMPLE-001"
+  },
+  {
+    "original_id": "SYM-002",
+    "simplified_id": "SIMPLE-002"
+  },
+  {
+    "original_id": "SYM-003",
+    "simplified_id": "SIMPLE-003"
+  },
+  {
+    "original_id": "SYM-004",
+    "simplified_id": "SIMPLE-004"
+  }
+]

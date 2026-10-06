@@ -1,1 +1,65 @@
-[]
+[
+  {
+    "tag": "FT-101",
+    "type": "AI",
+    "description": "Flow transmitter",
+    "loop": "Flow 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "FIC-101",
+    "type": "AI",
+    "description": "Flow indicator controller",
+    "loop": "Flow 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "FCV-101",
+    "type": "AO",
+    "description": "Flow control valve",
+    "loop": "Flow 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "TT-101",
+    "type": "AI",
+    "description": "Temperature transmitter",
+    "loop": "Temperature 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "LT-101",
+    "type": "AI",
+    "description": "Level transmitter",
+    "loop": "Level 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "TK-101",
+    "type": "Equipment",
+    "description": "Feed tank",
+    "loop": "Level 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "P-101",
+    "type": "Equipment",
+    "description": "Feed pump",
+    "loop": "Flow 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "R-101",
+    "type": "Equipment",
+    "description": "Reactor",
+    "loop": "Process 101",
+    "expected_status": "Found"
+  },
+  {
+    "tag": "FT-999",
+    "type": "AI",
+    "description": "Test missing flow transmitter",
+    "loop": "Flow 999",
+    "expected_status": "Missing"
+  }
+]

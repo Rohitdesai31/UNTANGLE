@@ -1,1 +1,51 @@
-{"nodes":[],"edges":[]}
+{
+  "nodes": [
+    {
+      "id": "SIMPLE-001",
+      "node_type": "tank",
+      "tag": "TK-101"
+    },
+    {
+      "id": "SIMPLE-002",
+      "node_type": "pump",
+      "tag": "P-101"
+    },
+    {
+      "id": "SIMPLE-003",
+      "node_type": "control_valve",
+      "tag": "FCV-101"
+    },
+    {
+      "id": "SIMPLE-004",
+      "node_type": "reactor",
+      "tag": "R-101"
+    },
+    {
+      "id": "SIMPLE-005",
+      "node_type": "outlet",
+      "tag": "OUTLET"
+    }
+  ],
+  "edges": [
+    {
+      "source": "SIMPLE-001",
+      "target": "SIMPLE-002",
+      "relation": "process_flow"
+    },
+    {
+      "source": "SIMPLE-002",
+      "target": "SIMPLE-003",
+      "relation": "process_flow"
+    },
+    {
+      "source": "SIMPLE-003",
+      "target": "SIMPLE-004",
+      "relation": "process_flow"
+    },
+    {
+      "source": "SIMPLE-004",
+      "target": "SIMPLE-005",
+      "relation": "process_flow"
+    }
+  ]
+}

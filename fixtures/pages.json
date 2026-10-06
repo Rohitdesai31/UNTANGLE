@@ -1,1 +1,9 @@
-[]
+
+[
+  {
+    "id": "PAGE-001",
+    "page_number": 1,
+    "width": 1200,
+    "height": 700
+  }
+]

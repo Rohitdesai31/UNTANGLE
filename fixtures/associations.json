@@ -1,1 +1,92 @@
-[]
+[
+  {
+    "source_id": "OCR-001",
+    "target_id": "SYM-001",
+    "relation": "tag_of",
+    "confidence": 0.99
+  },
+  {
+    "source_id": "OCR-002",
+    "target_id": "SYM-002",
+    "relation": "tag_of",
+    "confidence": 0.98
+  },
+  {
+    "source_id": "OCR-003",
+    "target_id": "SYM-005",
+    "relation": "tag_of",
+    "confidence": 0.96
+  },
+  {
+    "source_id": "OCR-004",
+    "target_id": "SYM-006",
+    "relation": "tag_of",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "OCR-005",
+    "target_id": "SYM-003",
+    "relation": "tag_of",
+    "confidence": 0.97
+  },
+  {
+    "source_id": "OCR-006",
+    "target_id": "SYM-004",
+    "relation": "tag_of",
+    "confidence": 0.99
+  },
+  {
+    "source_id": "OCR-007",
+    "target_id": "SYM-007",
+    "relation": "tag_of",
+    "confidence": 0.96
+  },
+  {
+    "source_id": "OCR-008",
+    "target_id": "SYM-008",
+    "relation": "tag_of",
+    "confidence": 0.96
+  },
+  {
+    "source_id": "LINE-001",
+    "target_id": "SYM-001",
+    "relation": "connects_from",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-001",
+    "target_id": "SYM-002",
+    "relation": "connects_to",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-002",
+    "target_id": "SYM-002",
+    "relation": "connects_from",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-002",
+    "target_id": "SYM-003",
+    "relation": "connects_to",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-003",
+    "target_id": "SYM-003",
+    "relation": "connects_from",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-003",
+    "target_id": "SYM-004",
+    "relation": "connects_to",
+    "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-004",
+    "target_id": "SYM-004",
+    "relation": "connects_from",
+    "confidence": 0.95
+  }
+]

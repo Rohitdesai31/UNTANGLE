@@ -1,1 +1,51 @@
-{"nodes":[],"edges":[]}
+{
+  "nodes": [
+    {
+      "id": "SYM-001",
+      "node_type": "tank",
+      "tag": "TK-101"
+    },
+    {
+      "id": "SYM-002",
+      "node_type": "pump",
+      "tag": "P-101"
+    },
+    {
+      "id": "SYM-003",
+      "node_type": "flow_control_valve",
+      "tag": "FCV-101"
+    },
+    {
+      "id": "SYM-004",
+      "node_type": "reactor",
+      "tag": "R-101"
+    },
+    {
+      "id": "OUTLET-001",
+      "node_type": "outlet",
+      "tag": "OUTLET"
+    }
+  ],
+  "edges": [
+    {
+      "source": "SYM-001",
+      "target": "SYM-002",
+      "relation": "process_flow"
+    },
+    {
+      "source": "SYM-002",
+      "target": "SYM-003",
+      "relation": "process_flow"
+    },
+    {
+      "source": "SYM-003",
+      "target": "SYM-004",
+      "relation": "process_flow"
+    },
+    {
+      "source": "SYM-004",
+      "target": "OUTLET-001",
+      "relation": "process_flow"
+    }
+  ]
+}

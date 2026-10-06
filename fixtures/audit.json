@@ -1,1 +1,32 @@
-{"io_total":0,"io_found":0,"io_missing":0,"io_coverage":0,"equipment_total":0,"equipment_found":0,"connections_valid":false,"flow_valid":false,"status":"FAIL"}
+{
+  "io_total": 9,
+  "io_found": 8,
+  "io_missing": 1,
+  "io_coverage": 88.89,
+  "equipment_total": 3,
+  "equipment_found": 3,
+  "connections_valid": true,
+  "flow_valid": true,
+  "status": "PASS",
+  "missing_tags": [
+    "FT-999"
+  ],
+  "found_tags": [
+    "FT-101",
+    "FIC-101",
+    "FCV-101",
+    "TT-101",
+    "LT-101",
+    "TK-101",
+    "P-101",
+    "R-101"
+  ],
+  "validation_checks": {
+    "all_required_equipment_preserved": true,
+    "all_found_io_tags_preserved": true,
+    "missing_io_tags_reported": true,
+    "process_connections_preserved": true,
+    "flow_direction_preserved": true,
+    "simplified_graph_valid": true
+  }
+}

@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "id": "SYM-001",
+    "class_name": "tank",
+    "tag": "TK-101",
+    "bbox": [100, 220, 220, 400],
+    "confidence": 0.98,
+    "page": 1
+  },
+  {
+    "id": "SYM-002",
+    "class_name": "pump",
+    "tag": "P-101",
+    "bbox": [300, 270, 380, 350],
+    "confidence": 0.97,
+    "page": 1
+  },
+  {
+    "id": "SYM-003",
+    "class_name": "flow_control_valve",
+    "tag": "FCV-101",
+    "bbox": [460, 280, 530, 340],
+    "confidence": 0.96,
+    "page": 1
+  },
+  {
+    "id": "SYM-004",
+    "class_name": "reactor",
+    "tag": "R-101",
+    "bbox": [620, 210, 780, 410],
+    "confidence": 0.98,
+    "page": 1
+  },
+  {
+    "id": "SYM-005",
+    "class_name": "flow_transmitter",
+    "tag": "FT-101",
+    "bbox": [390, 180, 450, 230],
+    "confidence": 0.94,
+    "page": 1
+  },
+  {
+    "id": "SYM-006",
+    "class_name": "flow_indicator_controller",
+    "tag": "FIC-101",
+    "bbox": [470, 150, 540, 205],
+    "confidence": 0.93,
+    "page": 1
+  },
+  {
+    "id": "SYM-007",
+    "class_name": "temperature_transmitter",
+    "tag": "TT-101",
+    "bbox": [690, 150, 750, 205],
+    "confidence": 0.95,
+    "page": 1
+  },
+  {
+    "id": "SYM-008",
+    "class_name": "level_transmitter",
+    "tag": "LT-101",
+    "bbox": [130, 150, 190, 205],
+    "confidence": 0.95,
+    "page": 1
+  }
+]

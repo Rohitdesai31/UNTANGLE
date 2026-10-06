@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "id": "LINE-001",
+    "points": [
+      [220, 310],
+      [300, 310]
+    ],
+    "line_type": "process",
+    "confidence": 0.98,
+    "page": 1
+  },
+  {
+    "id": "LINE-002",
+    "points": [
+      [380, 310],
+      [460, 310]
+    ],
+    "line_type": "process",
+    "confidence": 0.97,
+    "page": 1
+  },
+  {
+    "id": "LINE-003",
+    "points": [
+      [530, 310],
+      [620, 310]
+    ],
+    "line_type": "process",
+    "confidence": 0.97,
+    "page": 1
+  },
+  {
+    "id": "LINE-004",
+    "points": [
+      [780, 310],
+      [900, 310]
+    ],
+    "line_type": "process",
+    "confidence": 0.98,
+    "page": 1
+  },
+  {
+    "id": "LINE-005",
+    "points": [
+      [160, 220],
+      [160, 310]
+    ],
+    "line_type": "instrument",
+    "confidence": 0.94,
+    "page": 1
+  },
+  {
+    "id": "LINE-006",
+    "points": [
+      [420, 230],
+      [420, 280]
+    ],
+    "line_type": "instrument",
+    "confidence": 0.94,
+    "page": 1
+  },
+  {
+    "id": "LINE-007",
+    "points": [
+      [505, 205],
+      [505, 280]
+    ],
+    "line_type": "instrument",
+    "confidence": 0.93,
+    "page": 1
+  },
+  {
+    "id": "LINE-008",
+    "points": [
+      [720, 205],
+      [720, 250]
+    ],
+    "line_type": "instrument",
+    "confidence": 0.94,
+    "page": 1
+  }
+]
