@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
+
+from api.services.m1_service import m1_service
+
+from api.services.m1_output_service import m1_output_service
 
 from m2_topology.graph_builder import build_graph_from_files
 from m2_topology.topology_validator import validate_topology
@@ -17,6 +20,7 @@ from m3_simplify.svg_generator import create_mapping, generate_svg
 
 BASE_OUTPUT_DIR = Path("data/outputs")
 BASE_INTERMEDIATE_DIR = Path("data/intermediate")
+BASE_UPLOAD_DIR = Path("data/uploads")
 FIXTURE_DIR = Path("fixtures")
 
 
@@ -26,23 +30,56 @@ class PipelineService:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         input_dir = BASE_INTERMEDIATE_DIR / job_id
+        input_dir.mkdir(parents=True, exist_ok=True)
 
-        symbols_path = self._resolve_input(
-            input_dir / "symbols.json",
-            FIXTURE_DIR / "symbols.json",
-        )
-        lines_path = self._resolve_input(
-            input_dir / "lines.json",
-            FIXTURE_DIR / "lines.json",
-        )
-        associations_path = self._resolve_input(
-            input_dir / "associations.json",
-            FIXTURE_DIR / "associations.json",
-        )
-        io_list_path = self._resolve_input(
-            input_dir / "io_list.json",
-            FIXTURE_DIR / "io_list.json",
-        )
+        # ---------------------------------------------------------
+        # M1 — Prepare uploaded P&ID when real input files exist
+        # ---------------------------------------------------------
+        upload_dir = BASE_UPLOAD_DIR / job_id
+        pid_path = upload_dir / "pid.pdf"
+        io_path = upload_dir / "io_list.xlsx"
+
+        if pid_path.exists() and io_path.exists():
+            m1_service.prepare_job(job_id)
+
+               # ---------------------------------------------------------
+        # M1 → M2 handoff
+        #
+        # M1 owns creation of these files.
+        # M4 only discovers them.
+        #
+        # During development, controlled fixtures are used until
+        # the real M1 detection outputs become available.
+        # ---------------------------------------------------------
+        if m1_output_service.outputs_available(job_id):
+            m1_outputs = m1_output_service.get_output_paths_if_ready(job_id)
+
+            symbols_path = m1_outputs["symbols"]
+            lines_path = m1_outputs["lines"]
+            associations_path = m1_outputs["associations"]
+            io_list_path = m1_outputs["io_list"]
+
+            input_source = "m1"
+
+        else:
+            symbols_path = self._resolve_input(
+                input_dir / "symbols.json",
+                FIXTURE_DIR / "symbols.json",
+            )
+            lines_path = self._resolve_input(
+                input_dir / "lines.json",
+                FIXTURE_DIR / "lines.json",
+            )
+            associations_path = self._resolve_input(
+                input_dir / "associations.json",
+                FIXTURE_DIR / "associations.json",
+            )
+            io_list_path = self._resolve_input(
+                input_dir / "io_list.json",
+                FIXTURE_DIR / "io_list.json",
+            )
+
+            input_source = "fixture"
 
         # ---------------------------------------------------------
         # M2 — Topology construction
@@ -55,6 +92,9 @@ class PipelineService:
             output_path=str(output_dir / "graph.json"),
         )
 
+        # ---------------------------------------------------------
+        # M2 — Topology validation
+        # ---------------------------------------------------------
         validation = validate_topology(graph)
 
         if not validation.get("valid", False):
@@ -73,14 +113,19 @@ class PipelineService:
         simple_graph = route_edges(simple_graph)
 
         simple_graph_path = output_dir / "graph_simple.json"
+
         with simple_graph_path.open("w", encoding="utf-8") as file:
             json.dump(simple_graph, file, indent=2)
 
         # ---------------------------------------------------------
-        # M3 — SVG
+        # M3 — SVG generation
         # ---------------------------------------------------------
         sketch_path = output_dir / "sketch.svg"
-        generate_svg(simple_graph, str(sketch_path))
+
+        generate_svg(
+            simple_graph,
+            str(sketch_path),
+        )
 
         # ---------------------------------------------------------
         # M3 — Mapping
@@ -88,15 +133,20 @@ class PipelineService:
         mapping = create_mapping(simple_graph)
 
         mapping_path = output_dir / "mapping.json"
+
         with mapping_path.open("w", encoding="utf-8") as file:
             json.dump(mapping, file, indent=2)
 
         # ---------------------------------------------------------
         # M3 — Audit
         # ---------------------------------------------------------
-        audit = create_audit(graph, simple_graph)
+        audit = create_audit(
+            graph,
+            simple_graph,
+        )
 
         audit_path = output_dir / "audit.json"
+
         with audit_path.open("w", encoding="utf-8") as file:
             json.dump(audit, file, indent=2)
 
@@ -116,19 +166,35 @@ class PipelineService:
             "summary": {
                 "graph_nodes": len(graph.get("nodes", [])),
                 "graph_edges": len(graph.get("edges", [])),
-                "simplified_nodes": len(simple_graph.get("nodes", [])),
-                "simplified_edges": len(simple_graph.get("edges", [])),
-                "mapping_count": len(mapping.get("nodes", {})),
-                "io_coverage": audit.get("io_coverage_percent", 0.0),
-                "status": audit.get("overall", "FAIL"),
+                "simplified_nodes": len(
+                    simple_graph.get("nodes", [])
+                ),
+                "simplified_edges": len(
+                    simple_graph.get("edges", [])
+                ),
+                "mapping_count": len(
+                    mapping.get("nodes", {})
+                ),
+                "io_coverage": audit.get(
+                    "io_coverage_percent",
+                    0.0,
+                ),
+                "status": audit.get(
+                    "overall",
+                    "FAIL",
+                ),
             },
         }
 
     @staticmethod
-    def _resolve_input(primary: Path, fallback: Path) -> Path:
+    def _resolve_input(
+        primary: Path,
+        fallback: Path,
+    ) -> Path:
         """
         Use real M1 output when available.
-        Fall back to the controlled fixture until M1 is integrated.
+        Fall back to the controlled fixture until M1
+        produces the corresponding artifact.
         """
         if primary.exists():
             return primary
