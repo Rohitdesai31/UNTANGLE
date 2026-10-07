@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+BASE_INTERMEDIATE_DIR = Path("data/intermediate")
+
 
 class M1ContractError(ValueError):
     """Raised when an M1 output does not satisfy the M4 contract."""
@@ -84,7 +86,7 @@ class M1ContractService:
             )
 
     def validate_job_outputs(self, job_id: str) -> dict:
-        job_dir = Path("data/intermediate") / job_id
+        job_dir = BASE_INTERMEDIATE_DIR / job_id
 
         missing_files = [
             filename
