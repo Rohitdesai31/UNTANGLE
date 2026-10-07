@@ -6,7 +6,7 @@ from pathlib import Path
 from api.services.m1_service import m1_service
 
 from api.services.m1_output_service import m1_output_service
-
+from api.services.m1_contract_service import m1_contract_service
 from m2_topology.graph_builder import build_graph_from_files
 from m2_topology.topology_validator import validate_topology
 
@@ -16,7 +16,7 @@ from m3_simplify.preservation import mark_preserved_nodes
 from m3_simplify.routing import route_edges
 from m3_simplify.simplify import simplify_graph
 from m3_simplify.svg_generator import create_mapping, generate_svg
-
+ 
 
 BASE_OUTPUT_DIR = Path("data/outputs")
 BASE_INTERMEDIATE_DIR = Path("data/intermediate")
@@ -33,6 +33,7 @@ class PipelineService:
         input_dir.mkdir(parents=True, exist_ok=True)
 
         # ---------------------------------------------------------
+        # ---------------------------------------------------------
         # M1 — Prepare uploaded P&ID when real input files exist
         # ---------------------------------------------------------
         upload_dir = BASE_UPLOAD_DIR / job_id
@@ -42,16 +43,24 @@ class PipelineService:
         if pid_path.exists() and io_path.exists():
             m1_service.prepare_job(job_id)
 
-               # ---------------------------------------------------------
+        # ---------------------------------------------------------
         # M1 → M2 handoff
         #
         # M1 owns creation of these files.
-        # M4 only discovers them.
+        # M4 only discovers and validates them.
         #
         # During development, controlled fixtures are used until
         # the real M1 detection outputs become available.
         # ---------------------------------------------------------
         if m1_output_service.outputs_available(job_id):
+            contract = m1_contract_service.validate_job_outputs(job_id)
+
+            if not contract["ready"]:
+                raise ValueError(
+                    "M1 outputs are not ready: "
+                    + ", ".join(contract["missing_files"])
+                )
+
             m1_outputs = m1_output_service.get_output_paths_if_ready(job_id)
 
             symbols_path = m1_outputs["symbols"]
