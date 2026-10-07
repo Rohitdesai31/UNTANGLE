@@ -1,32 +1,41 @@
 {
-  "io_total": 9,
+  "io_total": 8,
   "io_found": 8,
-  "io_missing": 1,
-  "io_coverage": 88.89,
-  "equipment_total": 3,
-  "equipment_found": 3,
-  "connections_valid": true,
-  "flow_valid": true,
-  "status": "PASS",
-  "missing_tags": [
+  "io_missing": 0,
+  "io_coverage_percent": 100.0,
+  "missing_io_tags": [],
+  "source_io_total": 8,
+  "source_io_missing": 1,
+  "source_missing_io_tags": [
     "FT-999"
   ],
-  "found_tags": [
-    "FT-101",
-    "FIC-101",
-    "FCV-101",
-    "TT-101",
-    "LT-101",
-    "TK-101",
-    "P-101",
-    "R-101"
-  ],
-  "validation_checks": {
-    "all_required_equipment_preserved": true,
-    "all_found_io_tags_preserved": true,
-    "missing_io_tags_reported": true,
-    "process_connections_preserved": true,
-    "flow_direction_preserved": true,
-    "simplified_graph_valid": true
-  }
+  "equipment_total": 8,
+  "equipment_found": 8,
+  "equipment_missing": 0,
+  "missing_equipment": [],
+  "missing_tags": [],
+  "connections": "PASS",
+  "missing_connections": [],
+  "flow_direction": "PASS",
+  "missing_flow_direction": [],
+  "duty_standby": "PASS",
+  "missing_duty_standby": [],
+  "source_graph_validation": {
+    "valid": false,
+    "errors": [
+      {
+        "line_id": "LINE-004",
+        "reason": "unresolved_process_connection"
+      }
+    ],
+    "warnings": [
+      {
+        "reason": "missing_equipment",
+        "tags": [
+          "FT-999"
+        ]
+      }
+    ]
+  },
+  "overall": "PASS"
 }

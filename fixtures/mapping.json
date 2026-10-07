@@ -1,18 +1,118 @@
-[
-  {
-    "original_id": "SYM-001",
-    "simplified_id": "SIMPLE-001"
+{
+  "nodes": {
+    "TK-101": {
+      "original_id": "SYM-001",
+      "global_id": null,
+      "page": 1,
+      "type": "tank",
+      "visible_by_default": true,
+      "preserve": true
+    },
+    "P-101": {
+      "original_id": "SYM-002",
+      "global_id": null,
+      "page": 1,
+      "type": "pump",
+      "visible_by_default": true,
+      "preserve": true
+    },
+    "FCV-101": {
+      "original_id": "SYM-003",
+      "global_id": null,
+      "page": 1,
+      "type": "flow_control_valve",
+      "visible_by_default": false,
+      "preserve": true
+    },
+    "R-101": {
+      "original_id": "SYM-004",
+      "global_id": null,
+      "page": 1,
+      "type": "reactor",
+      "visible_by_default": true,
+      "preserve": true
+    },
+    "FT-101": {
+      "original_id": "SYM-005",
+      "global_id": null,
+      "page": 1,
+      "type": "flow_transmitter",
+      "visible_by_default": false,
+      "preserve": true
+    },
+    "FIC-101": {
+      "original_id": "SYM-006",
+      "global_id": null,
+      "page": 1,
+      "type": "flow_indicator_controller",
+      "visible_by_default": false,
+      "preserve": true
+    },
+    "TT-101": {
+      "original_id": "SYM-007",
+      "global_id": null,
+      "page": 1,
+      "type": "temperature_transmitter",
+      "visible_by_default": false,
+      "preserve": true
+    },
+    "LT-101": {
+      "original_id": "SYM-008",
+      "global_id": null,
+      "page": 1,
+      "type": "level_transmitter",
+      "visible_by_default": false,
+      "preserve": true
+    }
   },
-  {
-    "original_id": "SYM-002",
-    "simplified_id": "SIMPLE-002"
-  },
-  {
-    "original_id": "SYM-003",
-    "simplified_id": "SIMPLE-003"
-  },
-  {
-    "original_id": "SYM-004",
-    "simplified_id": "SIMPLE-004"
+  "edges": {
+    "EDGE-001": {
+      "source": "SYM-001",
+      "target": "SYM-002",
+      "line_id": "LINE-001",
+      "flow_direction": "forward",
+      "route": [
+        [
+          150,
+          180
+        ],
+        [
+          390,
+          180
+        ]
+      ]
+    },
+    "EDGE-002": {
+      "source": "SYM-002",
+      "target": "SYM-003",
+      "line_id": "LINE-002",
+      "flow_direction": "forward",
+      "route": [
+        [
+          390,
+          180
+        ],
+        [
+          630,
+          180
+        ]
+      ]
+    },
+    "EDGE-003": {
+      "source": "SYM-003",
+      "target": "SYM-004",
+      "line_id": "LINE-003",
+      "flow_direction": "forward",
+      "route": [
+        [
+          630,
+          180
+        ],
+        [
+          870,
+          180
+        ]
+      ]
+    }
   }
-]
+}

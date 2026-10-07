@@ -1,51 +1,357 @@
 {
   "nodes": [
     {
-      "id": "SIMPLE-001",
-      "node_type": "tank",
-      "tag": "TK-101"
+      "id": "SYM-001",
+      "tag": "TK-101",
+      "type": "tank",
+      "page": 1,
+      "bbox": [
+        100,
+        220,
+        220,
+        400
+      ],
+      "confidence": 0.98,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "Equipment",
+      "description": "Feed tank",
+      "loop": "Level 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 150,
+        "y": 180,
+        "row": "process"
+      }
     },
     {
-      "id": "SIMPLE-002",
-      "node_type": "pump",
-      "tag": "P-101"
+      "id": "SYM-002",
+      "tag": "P-101",
+      "type": "pump",
+      "page": 1,
+      "bbox": [
+        300,
+        270,
+        380,
+        350
+      ],
+      "confidence": 0.97,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "Equipment",
+      "description": "Feed pump",
+      "loop": "Flow 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 390,
+        "y": 180,
+        "row": "process"
+      }
     },
     {
-      "id": "SIMPLE-003",
-      "node_type": "control_valve",
-      "tag": "FCV-101"
+      "id": "SYM-003",
+      "tag": "FCV-101",
+      "type": "flow_control_valve",
+      "page": 1,
+      "bbox": [
+        460,
+        280,
+        530,
+        340
+      ],
+      "confidence": 0.96,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "AO",
+      "description": "Flow control valve",
+      "loop": "Flow 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 630,
+        "y": 180,
+        "row": "process"
+      }
     },
     {
-      "id": "SIMPLE-004",
-      "node_type": "reactor",
-      "tag": "R-101"
+      "id": "SYM-004",
+      "tag": "R-101",
+      "type": "reactor",
+      "page": 1,
+      "bbox": [
+        620,
+        210,
+        780,
+        410
+      ],
+      "confidence": 0.98,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "Equipment",
+      "description": "Reactor",
+      "loop": "Process 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 870,
+        "y": 180,
+        "row": "process"
+      }
     },
     {
-      "id": "SIMPLE-005",
-      "node_type": "outlet",
-      "tag": "OUTLET"
+      "id": "SYM-005",
+      "tag": "FT-101",
+      "type": "flow_transmitter",
+      "page": 1,
+      "bbox": [
+        390,
+        180,
+        450,
+        230
+      ],
+      "confidence": 0.94,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "AI",
+      "description": "Flow transmitter",
+      "loop": "Flow 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 150,
+        "y": 380,
+        "row": "instrument"
+      }
+    },
+    {
+      "id": "SYM-006",
+      "tag": "FIC-101",
+      "type": "flow_indicator_controller",
+      "page": 1,
+      "bbox": [
+        470,
+        150,
+        540,
+        205
+      ],
+      "confidence": 0.93,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "AI",
+      "description": "Flow indicator controller",
+      "loop": "Flow 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 390,
+        "y": 380,
+        "row": "instrument"
+      }
+    },
+    {
+      "id": "SYM-007",
+      "tag": "TT-101",
+      "type": "temperature_transmitter",
+      "page": 1,
+      "bbox": [
+        690,
+        150,
+        750,
+        205
+      ],
+      "confidence": 0.95,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "AI",
+      "description": "Temperature transmitter",
+      "loop": "Temperature 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 630,
+        "y": 380,
+        "row": "instrument"
+      }
+    },
+    {
+      "id": "SYM-008",
+      "tag": "LT-101",
+      "type": "level_transmitter",
+      "page": 1,
+      "bbox": [
+        130,
+        150,
+        190,
+        205
+      ],
+      "confidence": 0.95,
+      "is_io": true,
+      "preserve": true,
+      "io_type": "AI",
+      "description": "Level transmitter",
+      "loop": "Level 101",
+      "expected_status": "Found",
+      "preservation_reasons": [
+        "IO tag"
+      ],
+      "layout": {
+        "x": 870,
+        "y": 380,
+        "row": "instrument"
+      }
     }
   ],
   "edges": [
     {
-      "source": "SIMPLE-001",
-      "target": "SIMPLE-002",
-      "relation": "process_flow"
+      "id": "EDGE-001",
+      "source": "SYM-001",
+      "target": "SYM-002",
+      "line_id": "LINE-001",
+      "line_type": "process",
+      "page": 1,
+      "confidence": 0.98,
+      "validated": true,
+      "flow_direction": "forward",
+      "upstream": "SYM-001",
+      "downstream": "SYM-002",
+      "direction_source": "line_geometry",
+      "preserve": true,
+      "preservation_reasons": [
+        "correct process connection",
+        "flow direction",
+        "upstream/downstream"
+      ],
+      "route": [
+        [
+          150,
+          180
+        ],
+        [
+          390,
+          180
+        ]
+      ],
+      "routing": {
+        "type": "orthogonal",
+        "source": "SYM-001",
+        "target": "SYM-002"
+      }
     },
     {
-      "source": "SIMPLE-002",
-      "target": "SIMPLE-003",
-      "relation": "process_flow"
+      "id": "EDGE-002",
+      "source": "SYM-002",
+      "target": "SYM-003",
+      "line_id": "LINE-002",
+      "line_type": "process",
+      "page": 1,
+      "confidence": 0.97,
+      "validated": true,
+      "flow_direction": "forward",
+      "upstream": "SYM-002",
+      "downstream": "SYM-003",
+      "direction_source": "line_geometry",
+      "preserve": true,
+      "preservation_reasons": [
+        "correct process connection",
+        "flow direction",
+        "upstream/downstream"
+      ],
+      "route": [
+        [
+          390,
+          180
+        ],
+        [
+          630,
+          180
+        ]
+      ],
+      "routing": {
+        "type": "orthogonal",
+        "source": "SYM-002",
+        "target": "SYM-003"
+      }
     },
     {
-      "source": "SIMPLE-003",
-      "target": "SIMPLE-004",
-      "relation": "process_flow"
-    },
-    {
-      "source": "SIMPLE-004",
-      "target": "SIMPLE-005",
-      "relation": "process_flow"
+      "id": "EDGE-003",
+      "source": "SYM-003",
+      "target": "SYM-004",
+      "line_id": "LINE-003",
+      "line_type": "process",
+      "page": 1,
+      "confidence": 0.97,
+      "validated": true,
+      "flow_direction": "forward",
+      "upstream": "SYM-003",
+      "downstream": "SYM-004",
+      "direction_source": "line_geometry",
+      "preserve": true,
+      "preservation_reasons": [
+        "correct process connection",
+        "flow direction",
+        "upstream/downstream"
+      ],
+      "route": [
+        [
+          630,
+          180
+        ],
+        [
+          870,
+          180
+        ]
+      ],
+      "routing": {
+        "type": "orthogonal",
+        "source": "SYM-003",
+        "target": "SYM-004"
+      }
     }
-  ]
+  ],
+  "simplification_log": [],
+  "preservation": {
+    "io_tags": true,
+    "major_equipment": true,
+    "correct_connections": true,
+    "flow_direction": true,
+    "duty_standby": true,
+    "important_branches": true
+  },
+  "pump_patterns": [],
+  "junctions": [],
+  "metadata": {
+    "source": "graph_full.json",
+    "graph_type": "directed",
+    "node_count": 8,
+    "edge_count": 3,
+    "original_node_count": 8,
+    "original_edge_count": 3
+  },
+  "layout": {
+    "direction": "left-to-right",
+    "process_y": 180,
+    "instrument_y": 380,
+    "horizontal_gap": 240
+  },
+  "routing": {
+    "type": "orthogonal",
+    "routed_edges": 3,
+    "skipped_edges": 0
+  }
 }
