@@ -4,10 +4,19 @@ import json
 import shutil
 from pathlib import Path
 
-from shared.schemas import Audit, Graph, Mapping
+from m2_topology.graph_builder import build_graph_from_files
+from m2_topology.topology_validator import validate_topology
+
+from m3_simplify.audit import create_audit
+from m3_simplify.layout import calculate_layout
+from m3_simplify.preservation import mark_preserved_nodes
+from m3_simplify.routing import route_edges
+from m3_simplify.simplify import simplify_graph
+from m3_simplify.svg_generator import create_mapping, generate_svg
 
 
 BASE_OUTPUT_DIR = Path("data/outputs")
+BASE_INTERMEDIATE_DIR = Path("data/intermediate")
 FIXTURE_DIR = Path("fixtures")
 
 
@@ -16,90 +25,121 @@ class PipelineService:
         output_dir = BASE_OUTPUT_DIR / job_id
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        fixture_files = [
-            "graph.json",
-            "graph_simple.json",
-            "mapping.json",
-            "audit.json",
-        ]
+        input_dir = BASE_INTERMEDIATE_DIR / job_id
 
-        for filename in fixture_files:
-            source = FIXTURE_DIR / filename
-            destination = output_dir / filename
+        symbols_path = self._resolve_input(
+            input_dir / "symbols.json",
+            FIXTURE_DIR / "symbols.json",
+        )
+        lines_path = self._resolve_input(
+            input_dir / "lines.json",
+            FIXTURE_DIR / "lines.json",
+        )
+        associations_path = self._resolve_input(
+            input_dir / "associations.json",
+            FIXTURE_DIR / "associations.json",
+        )
+        io_list_path = self._resolve_input(
+            input_dir / "io_list.json",
+            FIXTURE_DIR / "io_list.json",
+        )
 
-            if not source.exists():
-                raise FileNotFoundError(
-                    f"Required fixture not found: {source}"
-                )
+        # ---------------------------------------------------------
+        # M2 — Topology construction
+        # ---------------------------------------------------------
+        graph = build_graph_from_files(
+            symbols_path=str(symbols_path),
+            lines_path=str(lines_path),
+            associations_path=str(associations_path),
+            io_list_path=str(io_list_path),
+            output_path=str(output_dir / "graph.json"),
+        )
 
-            shutil.copy2(source, destination)
+        validation = validate_topology(graph)
 
-        sketch_source = FIXTURE_DIR / "sketch.svg"
-        sketch_destination = output_dir / "sketch.svg"
-
-        if not sketch_source.exists():
-            raise FileNotFoundError(
-                f"Required fixture not found: {sketch_source}"
+        if not validation.get("valid", False):
+            raise ValueError(
+                f"Topology validation failed: "
+                f"{validation.get('errors', [])}"
             )
 
-        shutil.copy2(sketch_source, sketch_destination)
+        # ---------------------------------------------------------
+        # M3 — Process simplification
+        # ---------------------------------------------------------
+        preserved_graph = mark_preserved_nodes(graph)
 
-        graph = self._load_json(
-            output_dir / "graph.json",
-            Graph,
-        )
+        simple_graph = simplify_graph(preserved_graph)
+        simple_graph = calculate_layout(simple_graph)
+        simple_graph = route_edges(simple_graph)
 
-        graph_simple = self._load_json(
-            output_dir / "graph_simple.json",
-            Graph,
-        )
+        simple_graph_path = output_dir / "graph_simple.json"
+        with simple_graph_path.open("w", encoding="utf-8") as file:
+            json.dump(simple_graph, file, indent=2)
 
-        mapping = self._load_mapping(
-            output_dir / "mapping.json",
-        )
+        # ---------------------------------------------------------
+        # M3 — SVG
+        # ---------------------------------------------------------
+        sketch_path = output_dir / "sketch.svg"
+        generate_svg(simple_graph, str(sketch_path))
 
-        audit = self._load_json(
-            output_dir / "audit.json",
-            Audit,
-        )
+        # ---------------------------------------------------------
+        # M3 — Mapping
+        # ---------------------------------------------------------
+        mapping = create_mapping(simple_graph)
 
+        mapping_path = output_dir / "mapping.json"
+        with mapping_path.open("w", encoding="utf-8") as file:
+            json.dump(mapping, file, indent=2)
+
+        # ---------------------------------------------------------
+        # M3 — Audit
+        # ---------------------------------------------------------
+        audit = create_audit(graph, simple_graph)
+
+        audit_path = output_dir / "audit.json"
+        with audit_path.open("w", encoding="utf-8") as file:
+            json.dump(audit, file, indent=2)
+
+        # ---------------------------------------------------------
+        # Final API response
+        # ---------------------------------------------------------
         return {
             "job_id": job_id,
             "status": "completed",
             "outputs": {
                 "graph": str(output_dir / "graph.json"),
                 "graph_simple": str(output_dir / "graph_simple.json"),
-                "mapping": str(output_dir / "mapping.json"),
-                "sketch": str(output_dir / "sketch.svg"),
-                "audit": str(output_dir / "audit.json"),
+                "mapping": str(mapping_path),
+                "sketch": str(sketch_path),
+                "audit": str(audit_path),
             },
             "summary": {
-                "graph_nodes": len(graph.nodes),
-                "graph_edges": len(graph.edges),
-                "simplified_nodes": len(graph_simple.nodes),
-                "simplified_edges": len(graph_simple.edges),
-                "mapping_count": len(mapping),
-                "io_coverage": audit.io_coverage,
-                "status": audit.status,
+                "graph_nodes": len(graph.get("nodes", [])),
+                "graph_edges": len(graph.get("edges", [])),
+                "simplified_nodes": len(simple_graph.get("nodes", [])),
+                "simplified_edges": len(simple_graph.get("edges", [])),
+                "mapping_count": len(mapping.get("nodes", {})),
+                "io_coverage": audit.get("io_coverage_percent", 0.0),
+                "status": audit.get("overall", "FAIL"),
             },
         }
 
     @staticmethod
-    def _load_json(path: Path, model):
-        with path.open("r", encoding="utf-8") as file:
-            data = json.load(file)
+    def _resolve_input(primary: Path, fallback: Path) -> Path:
+        """
+        Use real M1 output when available.
+        Fall back to the controlled fixture until M1 is integrated.
+        """
+        if primary.exists():
+            return primary
 
-        return model.model_validate(data)
+        if fallback.exists():
+            return fallback
 
-    @staticmethod
-    def _load_mapping(path: Path) -> list[Mapping]:
-        with path.open("r", encoding="utf-8") as file:
-            data = json.load(file)
-
-        return [
-            Mapping.model_validate(item)
-            for item in data
-        ]
+        raise FileNotFoundError(
+            f"Required pipeline input not found: "
+            f"{primary} or {fallback}"
+        )
 
 
 pipeline_service = PipelineService()

@@ -88,5 +88,11 @@
     "target_id": "SYM-004",
     "relation": "connects_from",
     "confidence": 0.95
+  },
+  {
+    "source_id": "LINE-004",
+    "target_id": "SYM-009",
+    "relation": "connects_to",
+    "confidence": 0.95
   }
 ]
