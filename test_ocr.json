@@ -1,0 +1,266 @@
+[
+  {
+    "id": "OCR-001",
+    "text": "TIC",
+    "bbox": [
+      140,
+      0,
+      174,
+      23
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-002",
+    "text": "TT",
+    "bbox": [
+      299,
+      0,
+      322,
+      17
+    ],
+    "confidence": 0.834,
+    "page": 1
+  },
+  {
+    "id": "OCR-003",
+    "text": "TE",
+    "bbox": [
+      439,
+      0,
+      465,
+      15
+    ],
+    "confidence": 0.981,
+    "page": 1
+  },
+  {
+    "id": "OCR-004",
+    "text": "100",
+    "bbox": [
+      294,
+      17,
+      328,
+      47
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-005",
+    "text": "100",
+    "bbox": [
+      433,
+      14,
+      468,
+      44
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-006",
+    "text": "100",
+    "bbox": [
+      142,
+      24,
+      176,
+      50
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-007",
+    "text": "Fluid",
+    "bbox": [
+      487,
+      127,
+      529,
+      150
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-008",
+    "text": "TV",
+    "bbox": [
+      72,
+      150,
+      98,
+      170
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-009",
+    "text": "100",
+    "bbox": [
+      69,
+      168,
+      99,
+      187
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-010",
+    "text": "FT",
+    "bbox": [
+      468,
+      200,
+      495,
+      220
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-011",
+    "text": "FIC",
+    "bbox": [
+      581,
+      201,
+      611,
+      221
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-012",
+    "text": "101",
+    "bbox": [
+      464,
+      214,
+      499,
+      238
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-013",
+    "text": "101",
+    "bbox": [
+      581,
+      219,
+      611,
+      238
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-014",
+    "text": "Steam",
+    "bbox": [
+      0,
+      248,
+      47,
+      269
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-015",
+    "text": "FE",
+    "bbox": [
+      422,
+      283,
+      452,
+      303
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-016",
+    "text": "FV",
+    "bbox": [
+      667,
+      284,
+      694,
+      302
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-017",
+    "text": "101",
+    "bbox": [
+      421,
+      299,
+      453,
+      320
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-018",
+    "text": "101",
+    "bbox": [
+      664,
+      300,
+      695,
+      321
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-019",
+    "text": "Steam",
+    "bbox": [
+      0,
+      371,
+      41,
+      392
+    ],
+    "confidence": 0.974,
+    "page": 1
+  },
+  {
+    "id": "OCR-020",
+    "text": "Hea",
+    "bbox": [
+      753,
+      381,
+      786,
+      400
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-021",
+    "text": "Orifice Plate",
+    "bbox": [
+      421,
+      419,
+      504,
+      437
+    ],
+    "confidence": 1.0,
+    "page": 1
+  },
+  {
+    "id": "OCR-022",
+    "text": "Control Valve",
+    "bbox": [
+      550,
+      420,
+      641,
+      437
+    ],
+    "confidence": 1.0,
+    "page": 1
+  }
+]
