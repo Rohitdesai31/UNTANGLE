@@ -1,0 +1,9 @@
+names:
+  0: pump
+  1: tank
+  2: vessel
+  3: heat_exchanger
+  4: compressor
+  5: motor
+  6: valve
+  7: instrument

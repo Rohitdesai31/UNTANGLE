@@ -10,3 +10,5 @@ openpyxl
 pymupdf
 pillow
 reportlab
+httpx
+pytest
