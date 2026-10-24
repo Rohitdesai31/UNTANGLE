@@ -324,13 +324,22 @@ def create_mapping(graph):
             continue
 
         mapping["edges"][edge_id] = {
-            "source": edge.get("source"),
-            "target": edge.get("target"),
-            "line_id": edge.get("line_id"),
-            "flow_direction": edge.get(
-                "flow_direction"
-            ),
-            "route": edge.get("route", []),
-        }
+    "source": edge.get("source"),
+    "target": edge.get("target"),
+    "line_id": edge.get("line_id"),
+    "original_edge_ids": edge.get(
+        "original_edge_ids", []
+    ),
+    "original_line_ids": edge.get(
+        "original_line_ids", []
+    ),
+    "generated_by": edge.get(
+        "generated_by"
+    ),
+    "flow_direction": edge.get(
+        "flow_direction"
+    ),
+    "route": edge.get("route", []),
+}
 
     return mapping

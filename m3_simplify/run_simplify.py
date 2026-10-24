@@ -4,7 +4,7 @@ UNTANGLE - M3 Process Simplification Runner
 
 import json
 
-from m3_simplify.preservation import mark_preserved_nodes
+from m3_simplify.preservation import apply_preservation_rules
 from m3_simplify.simplify import simplify_graph
 from m3_simplify.layout import calculate_layout
 from m3_simplify.routing import route_edges
@@ -33,22 +33,7 @@ if __name__ == "__main__":
     graph_path = f"{BASE_DIR}/graph_full.json"
     original_graph = load_json(graph_path)
 
-    # --------------------------------
-    # 2. Get IO tags
-    # --------------------------------
-    io_tags = {
-        node["tag"]
-        for node in original_graph.get("nodes", [])
-        if node.get("is_io")
-    }
-
-    # --------------------------------
-    # 3. Mark preservation rules
-    # --------------------------------
-    marked_graph = mark_preserved_nodes(
-        original_graph,
-        io_tags
-    )
+    marked_graph = apply_preservation_rules(original_graph)
 
     # --------------------------------
     # 4. Simplify graph

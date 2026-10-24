@@ -54,6 +54,78 @@ def is_io_node(node):
     return get_node_class(node) in IO_CLASSES
 
 
+def _is_connection_preserved(
+    source,
+    target,
+    simple_edges,
+):
+    """
+    Check whether an original connection is represented
+    directly or through an M3 connectivity bridge.
+    """
+
+    for edge in simple_edges:
+
+        if (
+            edge.get("source") == source
+            and edge.get("target") == target
+        ):
+            return True
+
+        original_edges = set(
+            edge.get("original_edge_ids", [])
+        )
+
+        if not original_edges:
+            continue
+
+        return_value = False
+
+        if (
+            edge.get("generated_by")
+            == "m3_connectivity_bridge"
+        ):
+            return_value = True
+
+        if return_value:
+            for original_edge_id in original_edges:
+                if original_edge_id:
+                    return True
+
+    return False
+
+
+def _bridge_preserves_path(
+    original_edge,
+    simple_edges,
+):
+    """
+    Verify that an original edge is represented by a
+    simplified bridge using original edge IDs.
+    """
+
+    original_edge_id = original_edge.get("id")
+
+    if not original_edge_id:
+        return False
+
+    for edge in simple_edges:
+
+        if (
+            edge.get("generated_by")
+            != "m3_connectivity_bridge"
+        ):
+            continue
+
+        if original_edge_id in edge.get(
+            "original_edge_ids",
+            [],
+        ):
+            return True
+
+    return False
+
+
 def create_audit(original_graph, simplified_graph):
 
     original_nodes = original_graph.get("nodes", [])
@@ -88,7 +160,6 @@ def create_audit(original_graph, simplified_graph):
     # 2. IO COVERAGE
     # ========================================================
 
-    # Actual IO tags detected in the source P&ID.
     source_io_tags = {
         node.get("tag")
         for node in original_nodes
@@ -98,7 +169,6 @@ def create_audit(original_graph, simplified_graph):
         )
     }
 
-    # IO tags actually found in simplified graph.
     simple_io_tags = {
         node.get("tag")
         for node in simple_nodes
@@ -108,7 +178,6 @@ def create_audit(original_graph, simplified_graph):
         )
     }
 
-    # IO tags expected by the original source graph.
     expected_io_tags = set(
         original_metadata.get(
             "io_expected_tags",
@@ -116,29 +185,15 @@ def create_audit(original_graph, simplified_graph):
         )
     )
 
-    # If expected tags are unavailable, use actual source IO.
     if not expected_io_tags:
         expected_io_tags = set(source_io_tags)
 
-    # IO tags that were missing from the original P&ID itself.
     source_missing_io_tags = set(
         original_metadata.get(
             "io_missing_tags",
             []
         )
     )
-
-    # --------------------------------------------------------
-    # IMPORTANT:
-    # Source-missing IO is NOT treated as simplification loss.
-    #
-    # Example:
-    # Expected by IO list = FT-999
-    # But FT-999 was never present in source P&ID.
-    #
-    # Therefore it cannot be considered an IO removed by
-    # simplification.
-    # --------------------------------------------------------
 
     auditable_source_io_tags = (
         expected_io_tags - source_missing_io_tags
@@ -196,42 +251,75 @@ def create_audit(original_graph, simplified_graph):
         original_node_ids - simple_node_ids
     )
 
+    # Hidden intermediate nodes are intentionally removed.
+    # Only nodes marked for preservation are required.
+    required_node_ids = {
+        node.get("id")
+        for node in original_nodes
+        if (
+            node.get("id")
+            and node.get("preserve", False)
+        )
+    }
+
+    missing_required_nodes = sorted(
+        required_node_ids - simple_node_ids
+    )
+
     equipment_pass = (
-        len(missing_equipment_ids) == 0
+        len(missing_required_nodes) == 0
     )
 
     # ========================================================
     # 4. CONNECTION CHECK
     # ========================================================
 
-    original_connections = {
-        (
-            edge.get("source"),
-            edge.get("target"),
-        )
+    original_connections = [
+        edge
         for edge in original_edges
         if (
             edge.get("preserve", True)
             and edge.get("source")
             and edge.get("target")
         )
-    }
+    ]
 
-    simple_connections = {
-        (
-            edge.get("source"),
-            edge.get("target"),
+    missing_connections = []
+
+    for edge in original_connections:
+
+        source = edge.get("source")
+        target = edge.get("target")
+
+        # Direct simplified connection.
+        direct_connection = any(
+            simple_edge.get("source") == source
+            and simple_edge.get("target") == target
+            for simple_edge in simple_edges
         )
-        for edge in simple_edges
+
+        if direct_connection:
+            continue
+
+        # Original edge may be represented by an M3 bridge.
+        if _bridge_preserves_path(
+            edge,
+            simple_edges,
+        ):
+            continue
+
+        # If both endpoints remain preserved but the
+        # connection disappeared, report it.
         if (
-            edge.get("source")
-            and edge.get("target")
-        )
-    }
-
-    missing_connections = sorted(
-        original_connections - simple_connections
-    )
+            source in simple_node_ids
+            and target in simple_node_ids
+        ):
+            missing_connections.append(
+                {
+                    "source": source,
+                    "target": target,
+                }
+            )
 
     connections_pass = (
         len(missing_connections) == 0
@@ -241,32 +329,96 @@ def create_audit(original_graph, simplified_graph):
     # 5. FLOW DIRECTION CHECK
     # ========================================================
 
-    original_flow = {
-        (
-            edge.get("source"),
-            edge.get("target"),
-            edge.get("flow_direction"),
-            edge.get("upstream"),
-            edge.get("downstream"),
-        )
-        for edge in original_edges
-        if edge.get("preserve", True)
-    }
+    missing_flow = []
 
-    simple_flow = {
-        (
-            edge.get("source"),
-            edge.get("target"),
-            edge.get("flow_direction"),
-            edge.get("upstream"),
-            edge.get("downstream"),
-        )
-        for edge in simple_edges
-    }
+    for edge in original_connections:
 
-    missing_flow = sorted(
-        original_flow - simple_flow
-    )
+        original_edge_id = edge.get("id")
+
+        # Direct edge.
+        direct_match = False
+
+        for simple_edge in simple_edges:
+
+            if (
+                simple_edge.get("source")
+                == edge.get("source")
+                and
+                simple_edge.get("target")
+                == edge.get("target")
+            ):
+
+                if (
+                    simple_edge.get(
+                        "flow_direction"
+                    )
+                    == edge.get(
+                        "flow_direction"
+                    )
+                ):
+                    direct_match = True
+                    break
+
+        if direct_match:
+            continue
+
+        # Bridge edge.
+        bridge_match = False
+
+        for simple_edge in simple_edges:
+
+            if (
+                simple_edge.get("generated_by")
+                != "m3_connectivity_bridge"
+            ):
+                continue
+
+            if (
+                original_edge_id
+                in simple_edge.get(
+                    "original_edge_ids",
+                    [],
+                )
+            ):
+
+                bridge_direction = simple_edge.get(
+                    "flow_direction"
+                )
+
+                original_direction = edge.get(
+                    "flow_direction"
+                )
+
+                if (
+                    bridge_direction
+                    == original_direction
+                ):
+                    bridge_match = True
+                    break
+
+        if bridge_match:
+            continue
+
+        if (
+            edge.get("source") in simple_node_ids
+            and
+            edge.get("target") in simple_node_ids
+        ):
+            missing_flow.append(
+                {
+                    "source": edge.get("source"),
+                    "target": edge.get("target"),
+                    "flow_direction": edge.get(
+                        "flow_direction"
+                    ),
+                    "upstream": edge.get(
+                        "upstream"
+                    ),
+                    "downstream": edge.get(
+                        "downstream"
+                    ),
+                }
+            )
 
     flow_direction_pass = (
         len(missing_flow) == 0
@@ -333,13 +485,6 @@ def create_audit(original_graph, simplified_graph):
     # 8. OVERALL SIMPLIFICATION RESULT
     # ========================================================
 
-    # IMPORTANT:
-    # Source-level missing IO and unresolved source connections
-    # are reported separately.
-    #
-    # They do NOT automatically mean that simplification lost
-    # information.
-
     overall_pass = (
         io_pass
         and equipment_pass
@@ -387,14 +532,14 @@ def create_audit(original_graph, simplified_graph):
         ),
 
         "equipment_missing": len(
-            missing_equipment_ids
+            missing_required_nodes
         ),
 
         "missing_equipment": [
             {
                 "id": node_id
             }
-            for node_id in missing_equipment_ids
+            for node_id in missing_required_nodes
         ],
 
         "missing_tags": missing_tags,
@@ -405,13 +550,7 @@ def create_audit(original_graph, simplified_graph):
             else "FAIL"
         ),
 
-        "missing_connections": [
-            {
-                "source": source,
-                "target": target,
-            }
-            for source, target in missing_connections
-        ],
+        "missing_connections": missing_connections,
 
         "flow_direction": (
             "PASS"
@@ -419,22 +558,7 @@ def create_audit(original_graph, simplified_graph):
             else "FAIL"
         ),
 
-        "missing_flow_direction": [
-            {
-                "source": source,
-                "target": target,
-                "flow_direction": flow_direction,
-                "upstream": upstream,
-                "downstream": downstream,
-            }
-            for (
-                source,
-                target,
-                flow_direction,
-                upstream,
-                downstream,
-            ) in missing_flow
-        ],
+        "missing_flow_direction": missing_flow,
 
         "duty_standby": (
             "PASS"

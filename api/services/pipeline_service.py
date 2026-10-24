@@ -12,7 +12,7 @@ from m2_topology.topology_validator import validate_topology
 
 from m3_simplify.audit import create_audit
 from m3_simplify.layout import calculate_layout
-from m3_simplify.preservation import mark_preserved_nodes
+from m3_simplify.preservation import apply_preservation_rules
 from m3_simplify.routing import route_edges
 from m3_simplify.simplify import simplify_graph
 from m3_simplify.svg_generator import create_mapping, generate_svg
@@ -115,7 +115,7 @@ class PipelineService:
         # ---------------------------------------------------------
         # M3 — Process simplification
         # ---------------------------------------------------------
-        preserved_graph = mark_preserved_nodes(graph)
+        preserved_graph = apply_preservation_rules(graph)
 
         simple_graph = simplify_graph(preserved_graph)
         simple_graph = calculate_layout(simple_graph)

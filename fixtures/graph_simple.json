@@ -19,7 +19,8 @@
       "loop": "Level 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "major equipment"
       ],
       "layout": {
         "x": 150,
@@ -46,7 +47,8 @@
       "loop": "Flow 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "major equipment"
       ],
       "layout": {
         "x": 390,
@@ -73,7 +75,8 @@
       "loop": "Flow 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "IO equipment"
       ],
       "layout": {
         "x": 630,
@@ -100,7 +103,8 @@
       "loop": "Process 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "major equipment"
       ],
       "layout": {
         "x": 870,
@@ -127,7 +131,8 @@
       "loop": "Flow 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "IO equipment"
       ],
       "layout": {
         "x": 150,
@@ -154,7 +159,8 @@
       "loop": "Flow 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "IO equipment"
       ],
       "layout": {
         "x": 390,
@@ -181,7 +187,8 @@
       "loop": "Temperature 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "IO equipment"
       ],
       "layout": {
         "x": 630,
@@ -208,7 +215,8 @@
       "loop": "Level 101",
       "expected_status": "Found",
       "preservation_reasons": [
-        "IO tag"
+        "IO list tag",
+        "IO equipment"
       ],
       "layout": {
         "x": 870,
@@ -250,7 +258,9 @@
       "routing": {
         "type": "orthogonal",
         "source": "SYM-001",
-        "target": "SYM-002"
+        "target": "SYM-002",
+        "bends": 0,
+        "length": 240
       }
     },
     {
@@ -285,7 +295,9 @@
       "routing": {
         "type": "orthogonal",
         "source": "SYM-002",
-        "target": "SYM-003"
+        "target": "SYM-003",
+        "bends": 0,
+        "length": 240
       }
     },
     {
@@ -320,7 +332,9 @@
       "routing": {
         "type": "orthogonal",
         "source": "SYM-003",
-        "target": "SYM-004"
+        "target": "SYM-004",
+        "bends": 0,
+        "length": 240
       }
     }
   ],
@@ -336,22 +350,26 @@
   "pump_patterns": [],
   "junctions": [],
   "metadata": {
-    "source": "graph_full.json",
+    "source": "M1",
     "graph_type": "directed",
     "node_count": 8,
     "edge_count": 3,
     "original_node_count": 8,
-    "original_edge_count": 3
+    "original_edge_count": 3,
+    "connectivity_bridges": 0
   },
   "layout": {
     "direction": "left-to-right",
     "process_y": 180,
     "instrument_y": 380,
-    "horizontal_gap": 240
+    "horizontal_gap": 240,
+    "parallel_offset": 120,
+    "parallel_groups": []
   },
   "routing": {
     "type": "orthogonal",
     "routed_edges": 3,
-    "skipped_edges": 0
+    "skipped_edges": 0,
+    "crossing_conflicts": 0
   }
 }

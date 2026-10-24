@@ -241,3 +241,365 @@ def test_simplify_metadata_is_correct():
 
     assert result["metadata"]["original_node_count"] == 2
     assert result["metadata"]["original_edge_count"] == 1
+
+def test_simplify_bridges_hidden_intermediate_node():
+    graph = {
+        "nodes": [
+            {
+                "id": "A",
+                "tag": "TK-101",
+                "type": "tank",
+                "preserve": True,
+            },
+            {
+                "id": "H",
+                "tag": "XV-DETAIL",
+                "type": "valve",
+                "preserve": False,
+            },
+            {
+                "id": "B",
+                "tag": "P-101",
+                "type": "pump",
+                "preserve": True,
+            },
+        ],
+        "edges": [
+            {
+                "id": "E001",
+                "source": "A",
+                "target": "H",
+                "line_id": "L001",
+                "preserve": True,
+            },
+            {
+                "id": "E002",
+                "source": "H",
+                "target": "B",
+                "line_id": "L002",
+                "preserve": True,
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    assert len(result["nodes"]) == 2
+    assert len(result["edges"]) == 1
+
+    edge = result["edges"][0]
+
+    assert edge["source"] == "A"
+    assert edge["target"] == "B"
+    assert edge["generated_by"] == "m3_connectivity_bridge"
+
+    assert set(edge["original_edge_ids"]) == {
+        "E001",
+        "E002",
+    }
+
+
+def test_simplify_bridges_multiple_hidden_nodes():
+    graph = {
+        "nodes": [
+            {
+                "id": "A",
+                "preserve": True,
+            },
+            {
+                "id": "H1",
+                "preserve": False,
+            },
+            {
+                "id": "H2",
+                "preserve": False,
+            },
+            {
+                "id": "B",
+                "preserve": True,
+            },
+        ],
+        "edges": [
+            {
+                "id": "E001",
+                "source": "A",
+                "target": "H1",
+                "preserve": True,
+            },
+            {
+                "id": "E002",
+                "source": "H1",
+                "target": "H2",
+                "preserve": True,
+            },
+            {
+                "id": "E003",
+                "source": "H2",
+                "target": "B",
+                "preserve": True,
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    assert len(result["nodes"]) == 2
+    assert len(result["edges"]) == 1
+
+    edge = result["edges"][0]
+
+    assert edge["source"] == "A"
+    assert edge["target"] == "B"
+
+    assert set(edge["original_edge_ids"]) == {
+        "E001",
+        "E002",
+        "E003",
+    }
+
+
+def test_simplify_does_not_collapse_hidden_branch():
+    graph = {
+        "nodes": [
+            {
+                "id": "A",
+                "preserve": True,
+            },
+            {
+                "id": "H",
+                "preserve": False,
+            },
+            {
+                "id": "B",
+                "preserve": True,
+            },
+            {
+                "id": "C",
+                "preserve": True,
+            },
+        ],
+        "edges": [
+            {
+                "id": "E001",
+                "source": "A",
+                "target": "H",
+                "preserve": True,
+            },
+            {
+                "id": "E002",
+                "source": "H",
+                "target": "B",
+                "preserve": True,
+            },
+            {
+                "id": "E003",
+                "source": "H",
+                "target": "C",
+                "preserve": True,
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    assert len(result["edges"]) == 0
+
+    assert result["metadata"]["connectivity_bridges"] == 0
+
+def test_simplify_bridge_preserves_flow_direction():
+    graph = {
+        "nodes": [
+            {"id": "A", "preserve": True},
+            {"id": "H", "preserve": False},
+            {"id": "B", "preserve": True},
+        ],
+        "edges": [
+            {
+                "id": "E001",
+                "source": "A",
+                "target": "H",
+                "preserve": True,
+                "flow_direction": "forward",
+            },
+            {
+                "id": "E002",
+                "source": "H",
+                "target": "B",
+                "preserve": True,
+                "flow_direction": "forward",
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    assert len(result["edges"]) == 1
+    assert result["edges"][0]["source"] == "A"
+    assert result["edges"][0]["target"] == "B"
+    assert result["edges"][0]["flow_direction"] == "forward"
+
+
+def test_simplify_bridge_unknown_for_inconsistent_flow_direction():
+    graph = {
+        "nodes": [
+            {"id": "A", "preserve": True},
+            {"id": "H", "preserve": False},
+            {"id": "B", "preserve": True},
+        ],
+        "edges": [
+            {
+                "id": "E001",
+                "source": "A",
+                "target": "H",
+                "preserve": True,
+                "flow_direction": "forward",
+            },
+            {
+                "id": "E002",
+                "source": "H",
+                "target": "B",
+                "preserve": True,
+                "flow_direction": "reverse",
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    assert len(result["edges"]) == 1
+    assert result["edges"][0]["flow_direction"] == "unknown"
+
+def test_m2_graph_is_compatible_with_m3_simplification():
+    graph = {
+        "nodes": [
+            {
+                "id": "P-101",
+                "tag": "P-101",
+                "type": "pump",
+                "is_io": False,
+                "preserve": True,
+            },
+            {
+                "id": "FT-101",
+                "tag": "FT-101",
+                "type": "flow_transmitter",
+                "is_io": True,
+                "preserve": True,
+            },
+            {
+                "id": "HIDDEN-101",
+                "tag": None,
+                "type": "process_line",
+                "is_io": False,
+                "preserve": False,
+            },
+            {
+                "id": "R-101",
+                "tag": "R-101",
+                "type": "reactor",
+                "is_io": False,
+                "preserve": True,
+            },
+        ],
+        "edges": [
+            {
+                "id": "EDGE-001",
+                "source": "P-101",
+                "target": "HIDDEN-101",
+                "line_id": "L-101",
+                "line_type": "process",
+                "flow_direction": "forward",
+                "preserve": True,
+            },
+            {
+                "id": "EDGE-002",
+                "source": "HIDDEN-101",
+                "target": "FT-101",
+                "line_id": "L-102",
+                "line_type": "process",
+                "flow_direction": "forward",
+                "preserve": True,
+            },
+            {
+                "id": "EDGE-003",
+                "source": "FT-101",
+                "target": "R-101",
+                "line_id": "L-103",
+                "line_type": "process",
+                "flow_direction": "forward",
+                "preserve": True,
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    node_ids = {
+        node["id"]
+        for node in result["nodes"]
+    }
+
+    assert node_ids == {
+        "P-101",
+        "FT-101",
+        "R-101",
+    }
+
+    assert len(result["edges"]) == 2
+
+    bridge = next(
+        edge
+        for edge in result["edges"]
+        if edge.get("generated_by") == "m3_connectivity_bridge"
+    )
+
+    assert bridge["source"] == "P-101"
+    assert bridge["target"] == "FT-101"
+    assert bridge["flow_direction"] == "forward"
+    assert bridge["original_edge_ids"] == [
+        "EDGE-001",
+        "EDGE-002",
+    ]
+
+def test_simplify_does_not_bridge_hidden_branch():
+    graph = {
+        "nodes": [
+            {"id": "A", "preserve": True},
+            {"id": "H", "preserve": False},
+            {"id": "B", "preserve": True},
+            {"id": "C", "preserve": True},
+        ],
+        "edges": [
+            {
+                "id": "E001",
+                "source": "A",
+                "target": "H",
+                "preserve": True,
+                "flow_direction": "forward",
+            },
+            {
+                "id": "E002",
+                "source": "H",
+                "target": "B",
+                "preserve": True,
+                "flow_direction": "forward",
+            },
+            {
+                "id": "E003",
+                "source": "H",
+                "target": "C",
+                "preserve": True,
+                "flow_direction": "forward",
+            },
+        ],
+    }
+
+    result = simplify_graph(graph)
+
+    bridges = [
+        edge
+        for edge in result["edges"]
+        if edge.get("generated_by") == "m3_connectivity_bridge"
+    ]
+
+    assert len(bridges) == 0

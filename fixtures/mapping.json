@@ -70,6 +70,9 @@
       "source": "SYM-001",
       "target": "SYM-002",
       "line_id": "LINE-001",
+      "original_edge_ids": [],
+      "original_line_ids": [],
+      "generated_by": null,
       "flow_direction": "forward",
       "route": [
         [
@@ -86,6 +89,9 @@
       "source": "SYM-002",
       "target": "SYM-003",
       "line_id": "LINE-002",
+      "original_edge_ids": [],
+      "original_line_ids": [],
+      "generated_by": null,
       "flow_direction": "forward",
       "route": [
         [
@@ -102,6 +108,9 @@
       "source": "SYM-003",
       "target": "SYM-004",
       "line_id": "LINE-003",
+      "original_edge_ids": [],
+      "original_line_ids": [],
+      "generated_by": null,
       "flow_direction": "forward",
       "route": [
         [
