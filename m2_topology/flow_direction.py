@@ -119,14 +119,7 @@ def get_arrow_direction(line):
 def determine_flow_direction(graph, lines=None):
     """
     Add flow-direction information to every process edge.
-
-    The original source/target relationship is preserved.
-
-    Added fields:
-        flow_direction
-        upstream
-        downstream
-        direction_source
+    Use explicit arrow direction only; do not guess from geometry.
     """
 
     nodes = graph.get("nodes", [])
@@ -145,115 +138,38 @@ def determine_flow_direction(graph, lines=None):
     }
 
     for edge in edges:
-
         source_id = edge.get("source")
         target_id = edge.get("target")
 
         source = node_map.get(source_id)
         target = node_map.get(target_id)
 
-        # Invalid edge endpoints
         if not source or not target:
             edge["flow_direction"] = "unknown"
             edge["upstream"] = None
             edge["downstream"] = None
-            edge["direction_source"] = "unknown"
+            edge["direction_source"] = "invalid_endpoint"
             continue
 
-        # First preference: explicit arrow direction
-        line = get_edge_line(
-            edge,
-            lines_by_id,
-        )
-
+        line = get_edge_line(edge, lines_by_id)
         arrow_direction = get_arrow_direction(line)
 
-        line_direction = (
-            arrow_direction
-            if arrow_direction is not None
-            else (
-                get_line_direction(line)
-                if line
-                else "unknown"
-            )
-        )
-
-        if line_direction == "forward":
+        if arrow_direction == "forward":
             edge["flow_direction"] = "forward"
             edge["upstream"] = source_id
             edge["downstream"] = target_id
-            edge["direction_source"] = (
-                "arrow"
-                if arrow_direction is not None
-                else "line_geometry"
-            )
-            continue
+            edge["direction_source"] = "arrow"
 
-        if line_direction == "reverse":
+        elif arrow_direction == "reverse":
             edge["flow_direction"] = "reverse"
             edge["upstream"] = target_id
             edge["downstream"] = source_id
-            edge["direction_source"] = (
-                "arrow"
-                if arrow_direction is not None
-                else "line_geometry"
-            )
-            continue
+            edge["direction_source"] = "arrow"
 
-        # Second preference: node geometry
-        source_x, source_y = get_node_center(source)
-        target_x, target_y = get_node_center(target)
-
-        if (
-            source_x is None
-            or source_y is None
-            or target_x is None
-            or target_y is None
-        ):
-            edge["flow_direction"] = "unknown"
-            edge["upstream"] = None
-            edge["downstream"] = None
-            edge["direction_source"] = "unknown"
-            continue
-
-        dx = target_x - source_x
-        dy = target_y - source_y
-
-        distance = hypot(dx, dy)
-
-        if distance == 0:
-            edge["flow_direction"] = "unknown"
-            edge["upstream"] = None
-            edge["downstream"] = None
-            edge["direction_source"] = "unknown"
-            continue
-
-        # Left -> right
-        if abs(dx) >= abs(dy):
-
-            if dx > 0:
-                edge["flow_direction"] = "forward"
-                edge["upstream"] = source_id
-                edge["downstream"] = target_id
-
-            else:
-                edge["flow_direction"] = "reverse"
-                edge["upstream"] = target_id
-                edge["downstream"] = source_id
-
-        # Top -> bottom
         else:
-
-            if dy > 0:
-                edge["flow_direction"] = "forward"
-                edge["upstream"] = source_id
-                edge["downstream"] = target_id
-
-            else:
-                edge["flow_direction"] = "reverse"
-                edge["upstream"] = target_id
-                edge["downstream"] = source_id
-
-        edge["direction_source"] = "node_geometry"
+            edge["flow_direction"] = "unknown"
+            edge["upstream"] = None
+            edge["downstream"] = None
+            edge["direction_source"] = "insufficient_evidence"
 
     return graph

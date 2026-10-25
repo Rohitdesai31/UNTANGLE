@@ -10,12 +10,17 @@ Handles:
 """
 
 
+
 def get_page_id(item):
     """Return the page number from an item."""
+
     page = item.get("page")
 
     if page is None:
         page = item.get("page_id")
+
+    if page is None:
+        page = item.get("page_number")
 
     if isinstance(page, str):
         if page.lower().startswith("page-"):
@@ -98,15 +103,10 @@ def detect_duplicate_tags(symbols):
     return duplicates
 
 
+
 def build_page_references(pages):
     """
-    Build explicit references between pages.
-
-    Supported fields:
-    next_page
-    previous_page
-    continuation_page
-    references
+    Build page references using normalized page numbers.
     """
 
     references = []
@@ -117,38 +117,29 @@ def build_page_references(pages):
         if page_id is None:
             continue
 
-        next_page = page.get("next_page")
+        for field, reference_type in [
+            ("next_page", "next_page"),
+            ("previous_page", "previous_page"),
+            ("continuation_page", "continuation"),
+        ]:
+            target_page = page.get(field)
 
-        if next_page is not None:
-            references.append({
-                "source_page": page_id,
-                "target_page": next_page,
-                "type": "next_page"
-            })
+            if target_page is not None:
+                target_page = get_page_id({"page": target_page})
 
-        previous_page = page.get("previous_page")
-
-        if previous_page is not None:
-            references.append({
-                "source_page": page_id,
-                "target_page": previous_page,
-                "type": "previous_page"
-            })
-
-        continuation_page = page.get("continuation_page")
-
-        if continuation_page is not None:
-            references.append({
-                "source_page": page_id,
-                "target_page": continuation_page,
-                "type": "continuation"
-            })
+                references.append({
+                    "source_page": page_id,
+                    "target_page": target_page,
+                    "type": reference_type,
+                })
 
         for target_page in page.get("references", []):
+            target_page = get_page_id({"page": target_page})
+
             references.append({
                 "source_page": page_id,
                 "target_page": target_page,
-                "type": "reference"
+                "type": "reference",
             })
 
     return references
@@ -204,24 +195,42 @@ def detect_continuation_lines(lines):
     return continuation_lines
 
 
+
 def resolve_endpoint(endpoint, symbols):
     """
-    Resolve a local/global symbol reference.
+    Resolve an endpoint safely.
+    Return None if it is missing or ambiguous.
     """
 
     if endpoint is None:
         return None
 
-    for symbol in symbols:
+    # Exact global IDs should take priority.
+    global_matches = [
+        symbol for symbol in symbols
+        if symbol.get("global_id") == endpoint
+    ]
+
+    if len(global_matches) == 1:
+        return global_matches[0].get("global_id") or global_matches[0].get("id")
+
+    if len(global_matches) > 1:
+        return None
+
+    # Local IDs and tags may be duplicated across pages.
+    matches = [
+        symbol for symbol in symbols
         if endpoint in {
             symbol.get("id"),
             symbol.get("local_id"),
-            symbol.get("global_id"),
             symbol.get("tag"),
-        }:
-            return symbol.get("global_id") or symbol.get("id")
+        }
+    ]
 
-    return endpoint
+    if len(matches) != 1:
+        return None
+
+    return matches[0].get("global_id") or matches[0].get("id")
 
 
 def build_cross_page_connections(lines, symbols):

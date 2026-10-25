@@ -124,12 +124,13 @@ def build_process_connections(lines, associations):
     connects_from / connects_to associations.
 
     Instrument lines are intentionally excluded.
+    Preserve multiple associations for each process line.
     """
 
     process_line_ids = {
         line.get("id")
         for line in lines
-        if line.get("line_type") == "process"
+        if line.get("id") and line.get("line_type") == "process"
     }
 
     connections = {}
@@ -152,16 +153,15 @@ def build_process_connections(lines, associations):
         connections.setdefault(
             line_id,
             {
-                "source": None,
-                "target": None,
+                "source": [],
+                "target": [],
             },
         )
 
-        if relation == "connects_from":
-            connections[line_id]["source"] = symbol_id
+        key = "source" if relation == "connects_from" else "target"
 
-        elif relation == "connects_to":
-            connections[line_id]["target"] = symbol_id
+        if symbol_id not in connections[line_id][key]:
+            connections[line_id][key].append(symbol_id)
 
     return connections
 
@@ -172,11 +172,12 @@ def build_process_connections(lines, associations):
 
 def build_edges(lines, associations, node_ids):
     """
-    Create process edges only when both endpoints are known.
+    Create process edges only when a line has exactly
+    one known source and one known target.
 
-    IMPORTANT:
-    A process line with only one endpoint is NOT connected
-    artificially. It is reported as unresolved.
+    Missing, ambiguous, or invalid endpoints are reported
+    with reasons. Branches must be handled by topology/
+    junction logic without inventing connections.
     """
 
     process_connections = build_process_connections(
@@ -186,41 +187,120 @@ def build_edges(lines, associations, node_ids):
 
     edges = []
     unresolved_lines = []
+    unresolved_reasons = {}
+
+    # Prevent duplicate unresolved line IDs.
+    unresolved_line_ids = set()
+
+    def mark_unresolved(line_id, reason):
+        """Record an unresolved line and its reason."""
+        if line_id is None:
+            return
+
+        if line_id not in unresolved_line_ids:
+            unresolved_lines.append(line_id)
+            unresolved_line_ids.add(line_id)
+
+        unresolved_reasons.setdefault(line_id, []).append(reason)
 
     for line in lines:
 
+        # Only process lines are handled here.
         if line.get("line_type") != "process":
             continue
 
         line_id = line.get("id")
 
+        # A process line without an ID cannot be tracked reliably.
+        if not line_id:
+            continue
+
         connection = process_connections.get(
             line_id,
             {
-                "source": None,
-                "target": None,
+                "source": [],
+                "target": [],
             },
         )
 
-        source = connection.get("source")
-        target = connection.get("target")
+        sources = connection.get("source") or []
+        targets = connection.get("target") or []
 
-        # ----------------------------------------------------
-        # Unresolved process line
-        # ----------------------------------------------------
+        # Support both lists and older single-ID values.
+        if not isinstance(sources, list):
+            sources = [sources]
 
-        if not source or not target:
-            unresolved_lines.append(line_id)
+        if not isinstance(targets, list):
+            targets = [targets]
+
+        # Remove empty and duplicate endpoint IDs.
+        sources = list(dict.fromkeys(
+            source for source in sources if source
+        ))
+        targets = list(dict.fromkeys(
+            target for target in targets if target
+        ))
+
+        # Missing endpoint associations.
+        if not sources and not targets:
+            mark_unresolved(
+                line_id,
+                "Missing both source and target associations",
+            )
             continue
 
-        # ----------------------------------------------------
-        # Invalid endpoint
-        # ----------------------------------------------------
-
-        if source not in node_ids or target not in node_ids:
-            unresolved_lines.append(line_id)
+        if not sources:
+            mark_unresolved(
+                line_id,
+                "Missing source association",
+            )
             continue
 
+        if not targets:
+            mark_unresolved(
+                line_id,
+                "Missing target association",
+            )
+            continue
+
+        # Multiple endpoints may indicate a branch or ambiguity.
+        # Do not create all-to-all connections automatically.
+        if len(sources) > 1 or len(targets) > 1:
+            mark_unresolved(
+                line_id,
+                "Multiple sources or targets; topology resolution required",
+            )
+            continue
+
+        source = sources[0]
+        target = targets[0]
+
+        # Validate endpoint IDs against known graph nodes.
+        invalid_endpoints = []
+
+        if source not in node_ids:
+            invalid_endpoints.append(f"source '{source}'")
+
+        if target not in node_ids:
+            invalid_endpoints.append(f"target '{target}'")
+
+        if invalid_endpoints:
+            mark_unresolved(
+                line_id,
+                "Endpoint not found in node IDs: "
+                + ", ".join(invalid_endpoints),
+            )
+            continue
+
+        # Prevent a self-loop caused by an invalid association.
+        if source == target:
+            mark_unresolved(
+                line_id,
+                "Source and target refer to the same node",
+            )
+            continue
+
+        # Create an edge only when endpoint references are valid.
         edges.append(
             {
                 "id": f"EDGE-{len(edges) + 1:03d}",
@@ -231,10 +311,11 @@ def build_edges(lines, associations, node_ids):
                 "page": line.get("page"),
                 "confidence": line.get("confidence"),
                 "validated": False,
+                "validation_status": "needs_connection_validation",
             }
         )
 
-    return edges, unresolved_lines
+    return edges, unresolved_lines, unresolved_reasons
 
 
 # ============================================================
@@ -268,25 +349,34 @@ def create_networkx_graph(nodes, edges):
 # EDGE VALIDATION
 # ============================================================
 
+
 def validate_edges(edges, node_ids):
     """
-    Basic endpoint validation.
+    Validate node references only.
 
-    Detailed topology validation is handled separately by
-    topology_validator.py.
+    This does not prove physical connectivity.
     """
 
     for edge in edges:
         source_exists = edge.get("source") in node_ids
         target_exists = edge.get("target") in node_ids
 
-        edge["validated"] = (
-            source_exists
-            and target_exists
+        edge["endpoint_ids_valid"] = (
+            source_exists and target_exists
         )
 
-    return edges
+        # Physical connection validation requires additional
+        # geometric or independently validated evidence.
+        edge["validated"] = False
 
+        if not edge["endpoint_ids_valid"]:
+            edge["validation_status"] = "invalid_node_reference"
+        elif edge.get("validation_status") is None:
+            edge["validation_status"] = (
+                "needs_connection_validation"
+            )
+
+    return edges
 
 # ============================================================
 # IO VALIDATION
@@ -323,6 +413,9 @@ def validate_io(nodes, io_list):
 # ============================================================
 # MAIN GRAPH BUILDER
 # ============================================================
+# ============================================================
+# MAIN GRAPH BUILDER
+# ============================================================
 
 def build_graph(
     symbols,
@@ -344,13 +437,10 @@ def build_graph(
     """
 
     # --------------------------------------------------------
-    # 1. Nodes
+    # 1. Build nodes
     # --------------------------------------------------------
 
-    nodes = build_nodes(
-        symbols,
-        io_list,
-    )
+    nodes = build_nodes(symbols, io_list)
 
     node_ids = {
         node["id"]
@@ -358,41 +448,48 @@ def build_graph(
     }
 
     # --------------------------------------------------------
-    # 2. Process edges
+    # 2. Build process edges
+    # CHANGE: Receive all three values from build_edges().
     # --------------------------------------------------------
 
-    edges, unresolved_process_lines = build_edges(
+    (
+        edges,
+        unresolved_process_lines,
+        unresolved_reasons,
+    ) = build_edges(
         lines,
         associations,
         node_ids,
     )
 
-        # Record candidates that were not classified as process lines.
+    print("Detected symbols:", len(symbols))
+    print("Graph nodes:", len(nodes))
+    print(
+        "Process lines:",
+        sum(1 for line in lines if line.get("line_type") == "process"),
+    )
+    print("Created edges:", len(edges))
+    print("Unresolved process lines:", unresolved_process_lines)
+
+    # --------------------------------------------------------
+    # 3. Identify unclassified lines
+    # --------------------------------------------------------
+
     unclassified_lines = [
         line.get("id")
         for line in lines
         if line.get("id")
         and line.get("line_type") not in {"process", "instrument"}
     ]
-    # --------------------------------------------------------
-    # 3. Basic edge validation
-    # --------------------------------------------------------
-
-    edges = validate_edges(
-        edges,
-        node_ids,
-    )
 
     # --------------------------------------------------------
-    # 4. NetworkX directed graph
+    # 4. Validate edge endpoint IDs
     # --------------------------------------------------------
 
-    nx_graph = create_networkx_graph(
-        nodes,
-        edges,
-    )
-     # --------------------------------------------------------
-    # 5. Flow direction
+    edges = validate_edges(edges, node_ids)
+
+    # --------------------------------------------------------
+    # 5. Determine flow direction
     # --------------------------------------------------------
 
     flow_graph = {
@@ -407,24 +504,24 @@ def build_graph(
 
     nodes = flow_graph["nodes"]
     edges = flow_graph["edges"]
-    # --------------------------------------------------------
-    # 6. Junction detection
-    # --------------------------------------------------------
 
-    junction_graph = {
-        "nodes": nodes,
-        "edges": edges,
-    }
-
-       # --------------------------------------------------------
-    # Junction detection
+    # --------------------------------------------------------
+    # 6. Create NetworkX directed graph
     # --------------------------------------------------------
 
-    junctions = detect_junctions(
-        lines
+    nx_graph = create_networkx_graph(
+        nodes,
+        edges,
     )
+
     # --------------------------------------------------------
-    # 7. Pump patterns
+    # 7. Detect junctions
+    # --------------------------------------------------------
+
+    junctions = detect_junctions(lines)
+
+    # --------------------------------------------------------
+    # 8. Detect pump patterns
     # --------------------------------------------------------
 
     pattern_graph = {
@@ -432,21 +529,16 @@ def build_graph(
         "edges": edges,
     }
 
-    pump_patterns = detect_pump_patterns(
-        pattern_graph
-    )
+    pump_patterns = detect_pump_patterns(pattern_graph)
 
     # --------------------------------------------------------
-    # 8. IO validation
+    # 9. Validate IO tags
     # --------------------------------------------------------
 
-    io_validation = validate_io(
-        nodes,
-        io_list,
-    )
+    io_validation = validate_io(nodes, io_list)
 
     # --------------------------------------------------------
-    # 9. Final graph object
+    # 10. Create final graph object
     # --------------------------------------------------------
 
     graph = {
@@ -470,16 +562,18 @@ def build_graph(
             "io_missing_count": io_validation["missing_count"],
             "io_missing_tags": io_validation["missing_tags"],
 
-            "unresolved_process_lines": (
-                unresolved_process_lines
-            ),
+            # Existing: unresolved process line IDs
+            "unresolved_process_lines": unresolved_process_lines,
 
-	    "unclassified_lines": unclassified_lines,
+            # NEW: reason for each unresolved process line
+            "unresolved_process_line_reasons": unresolved_reasons,
+
+            # Existing: lines not classified as process/instrument
+            "unclassified_lines": unclassified_lines,
         },
     }
 
     return graph
-
 
 # ============================================================
 # BUILD FROM FILES

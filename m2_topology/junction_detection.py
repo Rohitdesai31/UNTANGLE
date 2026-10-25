@@ -14,6 +14,13 @@ def _point_equal(p1, p2, tolerance=EPSILON):
         and abs(p1[1] - p2[1]) <= tolerance
     )
 
+def _get_segments(line):
+    points = line.get("points", [])
+    return [
+        (points[i], points[i + 1])
+        for i in range(len(points) - 1)
+    ]
+
 
 def _orientation(a, b, c):
     value = (
@@ -129,25 +136,14 @@ def _has_explicit_connection_evidence(line1, line2):
     return False
 
 
+
 def detect_junctions(lines):
     """
-    Detect intersections between process lines.
+    Detect intersections between process lines, including bent lines.
 
-    Classification:
-      - T-junction:
-          One line terminates on another line.
-          This is treated as a real connected junction.
-
-      - X intersection:
-          Two lines cross in their interiors.
-          By default this is treated as a visual crossover,
-          NOT a process connection.
-
-          It becomes a connected junction only when explicit
-          connection evidence is present.
-
-    Important:
-      An intersection alone must never create a graph edge.
+    T-junctions are treated as connected.
+    X-crossings are not connected unless explicit evidence exists.
+    Intersections alone must never create graph edges.
     """
 
     process_lines = [
@@ -155,71 +151,80 @@ def detect_junctions(lines):
         for line in lines
         if line.get("line_type", "process") == "process"
         and len(line.get("points", [])) >= 2
+        and line.get("id") is not None
     ]
 
     junctions = []
+    seen = set()
 
     for i in range(len(process_lines)):
         for j in range(i + 1, len(process_lines)):
             line1 = process_lines[i]
             line2 = process_lines[j]
 
-            points1 = line1["points"]
-            points2 = line2["points"]
+            segments1 = _get_segments(line1)
+            segments2 = _get_segments(line2)
 
-            # Current implementation works with the first/last segment.
-            p1, p2 = points1[0], points1[-1]
-            q1, q2 = points2[0], points2[-1]
+            for p1, p2 in segments1:
+                for q1, q2 in segments2:
+                    intersection = _segment_intersection(
+                        p1, p2, q1, q2
+                    )
 
-            intersection = _segment_intersection(
-                p1,
-                p2,
-                q1,
-                q2,
-            )
+                    if intersection is None:
+                        continue
 
-            if intersection is None:
-                continue
+                    # Determine whether the intersection is an
+                    # endpoint of each complete line.
+                    line1_endpoint = _is_endpoint(intersection, line1)
+                    line2_endpoint = _is_endpoint(intersection, line2)
 
-            line1_endpoint = _is_endpoint(intersection, line1)
-            line2_endpoint = _is_endpoint(intersection, line2)
-
-            # T-junction:
-            # one line ends where another line continues.
-            if line1_endpoint != line2_endpoint:
-                junction_type = "T"
-                connected = True
-
-            # X-junction / crossover:
-            elif not line1_endpoint and not line2_endpoint:
-                junction_type = "X"
-
-                # Geometry alone does not prove connectivity.
-                connected = _has_explicit_connection_evidence(
-                    line1,
-                    line2,
-                )
-
-            else:
-                # Both lines share the same endpoint.
-                junction_type = "shared_endpoint"
-                connected = True
-
-            junctions.append(
-                {
-                    "id": f"JUNCTION-{len(junctions) + 1:03d}",
-                    "type": junction_type,
-                    "point": intersection,
-                    "line_ids": [
+                    # Avoid duplicate reports at the same point
+                    # when consecutive segments meet there.
+                    point_key = (
+                        round(intersection[0], 6),
+                        round(intersection[1], 6),
+                    )
+                    pair_key = (
                         line1["id"],
                         line2["id"],
-                    ],
-                    "connected": connected,
-                    "crossover": (
-                        junction_type == "X"
-                        and not connected
-                    ),
-                }
-            )
+                        point_key,
+                    )
+
+                    if pair_key in seen:
+                        continue
+
+                    seen.add(pair_key)
+
+                    if line1_endpoint != line2_endpoint:
+                        junction_type = "T"
+                        connected = True
+
+                    elif not line1_endpoint and not line2_endpoint:
+                        junction_type = "X"
+                        connected = _has_explicit_connection_evidence(
+                            line1, line2
+                        )
+
+                    else:
+                        junction_type = "shared_endpoint"
+                        connected = True
+
+                    junctions.append(
+                        {
+                            "id": f"JUNCTION-{len(junctions) + 1:03d}",
+                            "type": junction_type,
+                            "point": intersection,
+                            "line_ids": [
+                                line1["id"],
+                                line2["id"],
+                            ],
+                            "connected": connected,
+                            "crossover": (
+                                junction_type == "X"
+                                and not connected
+                            ),
+                        }
+                    )
 
     return junctions
